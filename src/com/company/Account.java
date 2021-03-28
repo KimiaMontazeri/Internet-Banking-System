@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Account
 {
-    private final UUID uuid;
+    private final UUID serial;
     private final String ID;
     private String firstName;
     private String lastName;
@@ -19,7 +19,7 @@ public class Account
         this.lastName = lastName;
         this.type = type;
         this.balance = balance;
-        uuid = UUID.randomUUID();
+        serial = UUID.randomUUID();
         transactionList = new ArrayList<Transaction>();
     }
 
@@ -43,9 +43,9 @@ public class Account
     {
         return balance;
     }
-    public UUID getUuid()
+    public UUID getSerial()
     {
-        return uuid;
+        return serial;
     }
     public ArrayList getTransactionList()
     {
@@ -55,12 +55,9 @@ public class Account
     public boolean updateBalance (int amount)
     {
         // note that amount can be a negative integer
-        // if statement is true when we deposit too much money from the account
         if (balance + amount < 0)
-        {
-            System.out.println("Not enough money!");
             return false;
-        }
+
         balance += amount;
         return true;
     }
@@ -82,15 +79,6 @@ public class Account
 
     public void printAccountData()
     {
-        System.out.println("Info of the account's owner is:");
-        System.out.println("ID: " + ID);
-        System.out.println("Firstname: " + firstName);
-        System.out.println("Lastname: " + lastName);
-        System.out.println();
-        System.out.println("Account type: " + type);
-        System.out.println("Account balance: " + balance);
-        System.out.println();
-        System.out.println("List of all the transactions: ");
-        printTransactions();
+        System.out.println(serial + ", " + ID + ", " + firstName + " " + lastName + ", " + balance);
     }
 }
