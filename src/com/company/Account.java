@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class Account
 {
-    UUID uuid;
-    private String ID;
+    private final UUID uuid;
+    private final String ID;
     private String firstName;
     private String lastName;
     private String type;
@@ -47,22 +47,31 @@ public class Account
     {
         return uuid;
     }
+    public ArrayList getTransactionList()
+    {
+        return transactionList;
+    }
 
-    public void updateBalance (int amount)
+    public boolean updateBalance (int amount)
     {
         // note that amount can be a negative integer
         // if statement is true when we deposit too much money from the account
-        if (balance - amount < 0)
+        if (balance + amount < 0)
         {
             System.out.println("Not enough money!");
-            return;
+            return false;
         }
         balance += amount;
+        return true;
     }
 
     public void addTransaction (Transaction transaction)
     {
         transactionList.add(transaction);
+        //updateBalance(transaction.getAmount());
+
+        if (updateBalance(transaction.getAmount()))
+            transactionList.add(transaction);
     }
 
     public void printTransactions()
