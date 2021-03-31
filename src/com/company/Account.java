@@ -10,7 +10,7 @@ public class Account
     private String lastName;
     private String type;
     private int balance;
-    ArrayList<Transaction> transactionList;
+    private ArrayList<Transaction> transactionList;
 
     public Account (String ID, String firstName, String lastName, String type, int balance)
     {
@@ -62,13 +62,27 @@ public class Account
         return true;
     }
 
+    public void updateBalanceBetter(int amount)
+    {
+        if (hasEnoughMoney(amount))
+            balance += amount;
+    }
+
+    public boolean hasEnoughMoney(int amount)
+    {
+        return balance + amount >= 0;
+    }
+
     public void addTransaction (Transaction transaction)
     {
-        transactionList.add(transaction);
-        //updateBalance(transaction.getAmount());
-
-        if (updateBalance(transaction.getAmount()))
+//        if (updateBalance(transaction.getAmount()))
+//            transactionList.add(transaction);
+//
+        if (hasEnoughMoney(transaction.getAmount()))
+        {
             transactionList.add(transaction);
+            updateBalance(transaction.getAmount());
+        }
     }
 
     public void printTransactions()
