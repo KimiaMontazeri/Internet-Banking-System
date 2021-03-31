@@ -12,13 +12,13 @@ public class Account
     private int balance;
     private ArrayList<Transaction> transactionList;
 
-    public Account (String ID, String firstName, String lastName, String type, int balance)
+    public Account (String ID, String firstName, String lastName, String type)
     {
         this.ID = ID;
         this.firstName = firstName;
         this.lastName = lastName;
         this.type = type;
-        this.balance = balance;
+        balance = 0;
         serial = UUID.randomUUID();
         transactionList = new ArrayList<Transaction>();
     }
@@ -47,7 +47,7 @@ public class Account
     {
         return serial;
     }
-    public ArrayList getTransactionList()
+    public ArrayList<Transaction> getTransactionList()
     {
         return transactionList;
     }
@@ -75,24 +75,21 @@ public class Account
 
     public void addTransaction (Transaction transaction)
     {
-//        if (updateBalance(transaction.getAmount()))
-//            transactionList.add(transaction);
-//
         if (hasEnoughMoney(transaction.getAmount()))
         {
             transactionList.add(transaction);
-            updateBalance(transaction.getAmount());
+            //updateBalance(transaction.getAmount());
         }
     }
 
     public void printTransactions()
     {
         for (Transaction t : transactionList)
-            System.out.println(t);
+            t.print();
     }
 
     public void printAccountData()
     {
-        System.out.println(serial + ", " + ID + ", " + firstName + " " + lastName + ", " + balance);
+        System.out.println(serial + ", " + type + ", " + ID + ", " + firstName + " " + lastName + ", " + balance);
     }
 }

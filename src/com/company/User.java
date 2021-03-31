@@ -36,6 +36,13 @@ public class User
         return password;
     }
 
+    public Account getAccountByIndex(int index)
+    {
+        if (index < 0 || index >= accountList.size())
+            return null;
+        return accountList.get(index);
+    }
+
     public boolean addAccount (Account account)
     {
         // check if the account already exists
@@ -45,7 +52,7 @@ public class User
             return false;
         }
         accountList.add(account);
-        System.out.println("The account is added to the list.");
+        System.out.println("New account opened.");
         return true;
     }
 
@@ -174,7 +181,7 @@ public class User
 
     // the user types : " destAccountSerial amount " for transferring money
     // the program uses this method to check if the destination account exists
-    private boolean searchAccountsBySerial (UUID serial)
+    private boolean searchAccountsBySerial (UUID serial) //it may be static idk
     {
         for (Account a : accountList)
         {

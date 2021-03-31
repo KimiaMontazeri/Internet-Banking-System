@@ -14,15 +14,26 @@ public class BankingSystem
         accounts = new ArrayList<>();
     }
 
-    public void register(User user)
+    public ArrayList<User> getUsers()
+    {
+        return users;
+    }
+
+    public ArrayList<Account> getAccounts()
+    {
+        return accounts;
+    }
+
+    public boolean register(User user)
     {
         if (searchUsers(user))
         {
-            System.out.println("User already exists.");
-            return;
+            System.out.println("user already exists.");
+            return false;
         }
         addUser(user);
-
+        System.out.println("user created.");
+        return true;
     }
 
     public void addUser(User user)
@@ -30,7 +41,12 @@ public class BankingSystem
         users.add(user);
     }
 
-    public boolean login(String id, String pass)
+    public void addAccount(Account account)
+    {
+        accounts.add(account);
+    }
+
+    public User login(String id, String pass)
     {
         for (User u : users)
         {
@@ -38,15 +54,16 @@ public class BankingSystem
             {
                 if (u.getPassword().equals(pass))
                 {
-                    System.out.println("You are logged in.");
-                    return true;
+                    System.out.println("Logged in.");
+                    return u;
                 }
                 System.out.println("Wrong password!");
-                return false;
+                return null;
             }
         }
         System.out.println("User not found.");
-        return false;
+        //System.out.println("user doesn't exists or password is incorrect.");
+        return null;
     }
 
     public void removeUser(User user)
@@ -54,19 +71,42 @@ public class BankingSystem
         if (searchUsers(user))
         {
             users.remove(user);
-            System.out.println("User is removed.");
+            System.out.println("User removed.");
             return;
         }
-        System.out.println("User does not exist.");
+        System.out.println("User doesn't exist.");
+    }
+
+    public void removeAccount(Account account)
+    {
+        if (searchAccounts(account))
+        {
+            accounts.remove(account);
+            System.out.println("Account removed.");
+            return;
+        }
+        System.out.println("Account doesn't exist.");
     }
 
     public void displayUsers()
     {
+        int i = 1;
         for (User u : users)
         {
-            System.out.println("ID: " + u.getID());
-            System.out.println(u.getFirstName() + " " + u.getLastname());
-            System.out.println("Password: " + u.getPassword());
+            System.out.print("User " + i + ": ");
+            System.out.println(u.getFirstName() + " " + u.getLastname() + " " + u.getID());
+            i++;
+        }
+    }
+
+    public void displayAccounts()
+    {
+        int i = 1;
+        for (Account a : accounts)
+        {
+            System.out.print("Account " + i + ": ");
+            a.printAccountData();
+            i++;
         }
     }
 
@@ -83,11 +123,24 @@ public class BankingSystem
         return null;
     }
 
+    public User findUser(String ID)
+    {
+        User temp;
+        Iterator<User> it = users.iterator();
+        while (it.hasNext())
+        {
+            temp = it.next();
+            if (temp.getID().equals(ID))
+                return temp;
+        }
+        return null;
+    }
+
     private boolean searchUsers(User user)
     {
         for (User u : users)
         {
-            // compare the user with the all the existing users by their ID
+            // compare the user with all the existing users by their ID
             if (u.getID().equals(user.getID()))
                 return true;
         }
