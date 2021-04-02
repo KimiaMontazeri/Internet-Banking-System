@@ -44,6 +44,7 @@ public class BankingSystem
     public void addAccount(Account account)
     {
         accounts.add(account);
+        System.out.println("New account opened.");
     }
 
     public User login(String id, String pass)
@@ -66,26 +67,42 @@ public class BankingSystem
         return null;
     }
 
-    public void removeUser(User user)
+    public boolean removeUser(User user)
     {
+        if (user == null)
+        {
+            System.out.println("User doesn't exist.");
+            return false;
+        }
         if (searchUsers(user))
         {
             users.remove(user);
             System.out.println("User removed.");
-            return;
+            return true;
         }
         System.out.println("User doesn't exist.");
+        return false;
     }
 
-    public void removeAccount(Account account)
+    public boolean removeAccount(Account account)
     {
+        if (account == null)
+        {
+            System.out.println("Account doesn't exist.");
+            return false;
+        }
         if (searchAccounts(account))
         {
+            // remove from the bank's list of accounts
             accounts.remove(account);
+            // remove the account from the user's list of accounts
+            User user = findUser(account.getID());
+            user.removeAccount(account);
             System.out.println("Account removed.");
-            return;
+            return true;
         }
         System.out.println("Account doesn't exist.");
+        return false;
     }
 
     public void displayUsers()
@@ -138,22 +155,22 @@ public class BankingSystem
 
     private boolean searchUsers(User user)
     {
-        for (User u : users)
-        {
-            // compare the user with all the existing users by their ID
-            if (u.getID().equals(user.getID()))
-                return true;
-        }
-        return false;
+//        for (User u : users)
+//        {
+//            // compare the user with all the existing users by their ID
+//            if (u.getID().equals(user.getID()))
+//                return true;
+//        }
+        return users.contains(user);
     }
 
     private boolean searchAccounts(Account account)
     {
-        for (Account a : accounts)
-        {
-            if (a.equals(account))
-                return true;
-        }
-        return false;
+//        for (Account a : accounts)
+//        {
+//            if (a.equals(account))
+//                return true;
+//        }
+        return accounts.contains(account);
     }
 }

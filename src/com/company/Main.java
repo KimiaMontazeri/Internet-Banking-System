@@ -1,20 +1,41 @@
 package com.company;
-import javax.swing.*;
 import java.util.Scanner;
 import java.util.UUID;
 
 public class Main
 {
-    User currentUser;
-    Account currentAccount;
-    boolean sysadmin;
+    private BankingSystem bank;
+    private User currentUser;
+    private Account currentAccount;
+    private boolean sysadmin;
 
-    public boolean signUp(BankingSystem bank)
+    public void mainMenu()
+    {
+        String userChoice;
+        Scanner scanner = new Scanner(System.in);
+        do {
+            System.out.println("1.Sign up");
+            System.out.println("2.Log in");
+            System.out.println("3.System admin");
+            System.out.println("4.Exit");
+            userChoice = scanner.nextLine();
+
+            switch (userChoice) {
+                case "1" -> signUp();
+                case "2" -> logIn();
+                case "3" -> sysadminLogIn();
+                case "4" -> System.out.println("Bye :))");
+                default -> System.out.println("Invalid input.");
+            }
+        }while(!userChoice.equals("4"));
+    }
+
+    public void signUp()
     {
         Scanner scanner = new Scanner(System.in);
         System.out.println("1.Continue\n2.Back");
-        if (scanner.nextInt() == 2)
-            return false;
+        if (scanner.nextLine().equals("2"))
+            mainMenu();
 
         System.out.println("Enter info: (firstname, lastname, ID, password)");
 
@@ -24,49 +45,68 @@ public class Main
         String password = scanner.nextLine();
 
         User newUser = new User(firstname, lastname, ID, password);
-        return bank.register(newUser);
+        if (bank.register(newUser))
+            mainMenu();
+        else
+        {
+            System.out.println("1.Try again\n2.Back");
+            if (scanner.nextLine().equals("1"))
+                signUp();
+            else
+                mainMenu();
+        }
     }
 
-    public boolean logIn(BankingSystem bank)
+    public void logIn()
     {
         Scanner scanner = new Scanner(System.in);
         System.out.println("1.Continue\n2.Back");
-        if (scanner.nextInt() == 2)
-            return false;
+        if (scanner.nextLine().equals("2"))
+            mainMenu();
 
         System.out.println("Enter ID and password:");
         String ID = scanner.nextLine();
         String password = scanner.nextLine();
 
         currentUser = bank.login(ID, password);
-        return currentUser != null;
+        if (currentUser == null)
+        {
+            System.out.println("1.Try again\n2.Back");
+            if (scanner.nextLine().equals("1"))
+                logIn();
+            else
+                mainMenu();
+        }
+        loggedInUserMenu();
     }
 
-    public void loggedInUserMenu(BankingSystem bank)
+    public void loggedInUserMenu()
     {
         // check if we're logged in
         if (currentUser == null)
-            return;
+            logIn();
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("1.Existing accounts\n2.Add new account\n3.Log out");
 
-        if (scanner.nextInt() == 1)
-            existingAccounts();
-        if (scanner.nextInt() == 2)
-        {
-            System.out.println("Enter your user ID and the account type:");
-            String ID = scanner.nextLine();
-            String type = scanner.nextLine();
-
-            Account account = new Account(ID, currentUser.getFirstName(), currentUser.getLastname(), type);
-            System.out.println("New account opened.");
-            bank.addAccount(account);
-        }
-        if (scanner.nextInt() == 2)
-        {
-            System.out.println("Logged out of user");
-            currentUser = null;
+        switch (scanner.nextLine()) {
+            case "1" -> existingAccounts();
+            case "2" -> {
+                System.out.println("Enter your user ID and the account type:");
+                String ID = scanner.nextLine();
+                String type = scanner.nextLine();
+                Account account = new Account(ID, currentUser.getFirstName(), currentUser.getLastname(), type);
+                currentUser.addAccount(account);
+                bank.addAccount(account);
+                loggedInUserMenu();
+            }
+            case "3" -> {
+                currentUser = null;
+                System.out.println("Logged out of user");
+                System.out.println("You will be forwarded back to log in menu...");
+                logIn();
+            }
+            default -> loggedInUserMenu();
         }
     }
 
@@ -74,23 +114,29 @@ public class Main
     {
         Scanner scanner = new Scanner(System.in);
         currentUser.printAllAvailableAccounts();
-        // get the account by the scanned account number
-        currentAccount = currentUser.getAccountByIndex(scanner.nextInt());
+
+        System.out.println("Enter the chosen account number or enter 0 to go back:");
+        int index = scanner.nextInt() - 1;
+        if (index == -1)
+            loggedInUserMenu();
+
+        currentAccount = currentUser.getAccountByIndex(index);
         while (currentAccount == null)
         {
             System.out.println("Invalid input. Try again:");
-            currentAccount = currentUser.getAccountByIndex(scanner.nextInt());
+            currentAccount = currentUser.getAccountByIndex(scanner.nextInt() - 1);
         }
         System.out.println("Logged into account.");
+        loggedInAccountMenu();
     }
 
-    public void loggedInAccountMenu(BankingSystem bank)
+    public void loggedInAccountMenu()
     {
         // check if we're logged in
         if (currentUser == null)
         {
             System.out.println("You haven't logged into a user yet.");
-            logIn(bank);
+            logIn();
         }
         if (currentAccount == null)
         {
@@ -99,110 +145,117 @@ public class Main
         }
 
         Scanner scanner = new Scanner(System.in);
-        System.out.println("1.Withdrawal\n2.Deposit\n3.Transfer\n4.Check balance\n5.Back");
-        int choice = scanner.nextInt();
-        if (choice == 1 || choice == 2)
+        System.out.println("1.Withdrawal\n2.Deposit\n3.Transfer\n4.Check balance\n5.Print transactions\n6.Back");
+        String choice = scanner.nextLine();
+        switch (choice)
         {
-            withdrawalOrDeposit(bank);
-            return;
+            case "1" -> withdrawal(getAmount());
+            case "2" -> deposit(getAmount());
+            case "3" -> transfer();
+            case "4" -> {
+                currentUser.checkBalance(currentAccount);
+                loggedInAccountMenu();
+            }
+            case "5" -> {
+                currentAccount.printAccountData();
+                System.out.println();
+                currentAccount.printTransactions();
+                System.out.println();
+                loggedInAccountMenu();
+            }
+            case "6" -> {
+                currentAccount = null;
+                existingAccounts();
+            }
         }
-        if (choice == 3)
-        {
-            transfer(bank);
-            return;
-        }
-        if (scanner.nextInt() == 4)
-        {
-            currentUser.checkBalance(currentAccount);
-            return;
-        }
-        if (scanner.nextInt() == 5)
-            logIn(bank);
     }
 
-    public void withdrawalOrDeposit(BankingSystem bank)
+    public int getAmount()
     {
         Scanner scanner = new Scanner(System.in);
-        int amount;
         System.out.println("How much money?");
-        amount = scanner.nextInt();
+        return Integer.parseInt(scanner.nextLine());
+    }
+
+    public void withdrawal(int amount)
+    {
         currentUser.withdrawal(currentAccount, amount);
-
         // go back
-        loggedInAccountMenu(bank);
+        loggedInAccountMenu();
     }
 
-    public void transfer (BankingSystem bank)
+    public void deposit(int amount)
+    {
+        currentUser.deposit(currentAccount, amount);
+        // go back
+        loggedInAccountMenu();
+    }
+
+    public void transfer()
     {
         Scanner scanner = new Scanner(System.in);
-        int amount;
-        System.out.println("How much money?");
-        amount = scanner.nextInt();
+        System.out.println("Enter destination account serial number & the amount of money to transfer(serial amount)");
 
-        // destAccount serial amount -> u have to scan this and concatenate by whitespace
-        System.out.println("Destination account serial number?");
-        UUID serial = UUID.fromString(scanner.next());
+        String[] result = scanner.nextLine().split("\\s");
+        // CHECK IF RESULT[0] IS VALID FOR UUID, (ILLEGAL ARGUMENT EXCEPTION)
+        UUID serial = UUID.fromString(result[0]);
+        int amount = Integer.parseInt(result[1]);
+
         Account destAccount = bank.findAccount(serial);
         currentUser.transfer(currentAccount, destAccount, amount);
-
         // go back
-        loggedInAccountMenu(bank);
+        loggedInAccountMenu();
     }
 
-    public void sysadminLogIn(BankingSystem bank)
+    public void sysadminLogIn()
     {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("1.Continue\n2.Back");
-        if (scanner.nextInt() == 2)
-            return;
+        System.out.println("1.Log in as sysadmin\n2.Back");
+        if (scanner.nextLine().equals("2"))
+            mainMenu();
 
-        System.out.println("Enter userId and password");
+        System.out.println("Enter userID and password");
         String username = scanner.nextLine();
         String password = scanner.nextLine();
         if (username.equals("sysadmin") && password.equals("1234"))
         {
             System.out.println("Logged in as sysadmin.");
             sysadmin = true;
-            sysadminMenu(bank);
+            sysadminMenu();
         }
-        System.out.println("Username or password is incorrect.");
+        else
+        {
+            System.out.println("Username or password is incorrect.");
+            sysadminLogIn();
+        }
     }
 
-    public void sysadminMenu(BankingSystem bank)
+    public void sysadminMenu()
     {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("1.Display users\n2.Display account\n3.Remove user\n4.Remove account\n5.Back");
-        if (scanner.nextInt() == 1)
-        {
-            bank.displayUsers();
-            return;
+        System.out.println("1.Display users\n2.Display accounts\n3.Remove user\n4.Remove account\n5.Back");
+        switch (scanner.nextLine()) {
+            case "1" -> {
+                bank.displayUsers();
+                sysadminMenu();
+            }
+            case "2" -> {
+                bank.displayAccounts();
+                sysadminMenu();
+            }
+            case "3" -> removeUser();
+            case "4" -> removeAccount();
+            case "5" -> sysadminLogIn();
+            default -> sysadminMenu();
         }
-        if (scanner.nextInt() == 2)
-        {
-            bank.displayAccounts();
-            return;
-        }
-        if (scanner.nextInt() == 3)
-        {
-            removeUser(bank);
-            return;
-        }
-        if (scanner.nextInt() == 4)
-        {
-            removeAccount(bank);
-            return;
-        }
-        if (scanner.nextInt() == 5)
-            sysadminLogIn(bank);
-
     }
 
-    public void removeUser(BankingSystem bank)
+    public void removeUser()
     {
         if (!sysadmin)
         {
             System.out.println("System admin has not logged in yet.");
-            sysadminLogIn(bank);
+            sysadminLogIn();
         }
 
         Scanner scanner = new Scanner(System.in);
@@ -210,78 +263,46 @@ public class Main
         String ID = scanner.nextLine();
         User user = bank.findUser(ID);
 
-        if (user == null)
+        if(!bank.removeUser(user))
         {
-            System.out.println("User doesn't exist.");
-            sysadminMenu(bank);
+            System.out.println("1.Try again\n2.Back");
+            if (scanner.nextLine().equals("1"))
+                removeUser();
+            else
+                sysadminMenu();
         }
-        bank.removeUser(user);
-        System.out.println("User removed.");
-        sysadminMenu(bank);
+        sysadminMenu();
     }
 
-    public void removeAccount(BankingSystem bank)
+    public void removeAccount()
     {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the account's serial number:");
         UUID serial = UUID.fromString(scanner.nextLine());
         Account account = bank.findAccount(serial);
-        if (account == null)
+
+        // remove the account from both the bank's list of account and the owner's list of account
+        if (!bank.removeAccount(account))
         {
-            System.out.println("Account doesn't exist.");
-            sysadminMenu(bank);
+            System.out.println("1.Try again\n2.Back");
+            if (scanner.nextLine().equals("1"))
+                removeAccount();
+            else
+                sysadminMenu();
         }
-        bank.removeAccount(account);
-
-        // remove the account from the user's list of accounts too
-        String ID = account.getID();
-        User user = bank.findUser(ID);
-        user.removeAccount(account);
-
-        System.out.println("Account removed.");
-        sysadminMenu(bank);
+        sysadminMenu();
     }
 
-    public void main(String[] args)
+    public Main()
     {
-        BankingSystem bank = new BankingSystem();
+        bank = new BankingSystem();
         currentUser = null;
         currentAccount = null;
+        mainMenu();
+    }
 
-        int userChoice;
-        Scanner scanner = new Scanner(System.in);
-        do {
-            System.out.println("1.Sign up");
-            System.out.println("2.Log in");
-            System.out.println("3.System admin");
-            System.out.println("4.Exit");
-            userChoice = scanner.nextInt();
-
-            switch (userChoice)
-            {
-                case 1:
-                    while(!signUp(bank))
-                    {
-                        System.out.println("1.Try again\n2.Back");
-                        if(scanner.nextInt() == 2)
-                            break;
-                    }
-                    break;
-                case 2:
-                    while(!logIn(bank))
-                    {
-                        System.out.println("1.Try again\n2.Back");
-                        if (scanner.nextInt() == 2)
-                            break;
-                    }
-                    break;
-                case 3:
-                    sysadminLogIn(bank);
-                    break;
-                default:
-                    System.out.println("Invalid input");
-                    break;
-            }
-        }while(userChoice != 4);
+    public static void main(String[] args)
+    {
+        new Main();
     }
 }

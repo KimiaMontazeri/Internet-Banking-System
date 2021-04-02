@@ -64,10 +64,8 @@ public class User
         if (searchAccounts(account))
         {
             accountList.remove(account);
-            System.out.println("The account is removed from the list.");
             return true;
         }
-        System.out.println("The account does not exist in the list.");
         return false;
     }
 
@@ -101,10 +99,9 @@ public class User
             amount *= -1;
 
         // check if there's enough money
-        if (account.hasEnoughMoney(amount))
+        if (account.updateBalance(amount))
         {
             Transaction transaction = new Transaction(amount);
-            account.updateBalance(amount);
             account.addTransaction(transaction);
             System.out.println("Completed.");
             return true;
@@ -126,9 +123,8 @@ public class User
 
         if (searchAccounts(destAccount))
         {
-            if (srcAccount.hasEnoughMoney((-1) * amount))
+            if (srcAccount.updateBalance((-1) * amount))
             {
-                srcAccount.updateBalance((-1) * amount);
                 destAccount.updateBalance(amount);
 
                 Transaction transaction1 = new Transaction((-1) * amount);
@@ -171,25 +167,25 @@ public class User
 
     private boolean searchAccounts(Account account)
     {
-        for (Account a : accountList)
-        {
-            if (a.equals(account))
-                return true;
-        }
-        return false;
+//        for (Account a : accountList)
+//        {
+//            if (a.equals(account))
+//                return true;
+//        }
+        return accountList.contains(account);
     }
 
     // the user types : " destAccountSerial amount " for transferring money
     // the program uses this method to check if the destination account exists
-    private boolean searchAccountsBySerial (UUID serial) //it may be static idk
-    {
-        for (Account a : accountList)
-        {
-            if (a.getSerial().equals(serial))
-                return true;
-        }
-        return false;
-    }
+//    private boolean searchAccountsBySerial (UUID serial) //it may be static idk
+//    {
+//        for (Account a : accountList)
+//        {
+//            if (a.getSerial().equals(serial))
+//                return true;
+//        }
+//        return false;
+//    }
 
 
 }

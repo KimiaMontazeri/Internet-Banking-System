@@ -52,23 +52,27 @@ public class Account
         return transactionList;
     }
 
-    public boolean updateBalance (int amount)
-    {
-        // note that amount can be a negative integer
-        if (balance + amount < 0)
-            return false;
+//    public boolean updateBalance (int amount)
+//    {
+//        // note that amount can be a negative integer
+//        if (balance + amount < 0)
+//            return false;
+//
+//        balance += amount;
+//        return true;
+//    }
 
-        balance += amount;
-        return true;
-    }
-
-    public void updateBalanceBetter(int amount)
+    public boolean updateBalance(int amount)
     {
         if (hasEnoughMoney(amount))
+        {
             balance += amount;
+            return true;
+        }
+        return false;
     }
 
-    public boolean hasEnoughMoney(int amount)
+    private boolean hasEnoughMoney(int amount)
     {
         return balance + amount >= 0;
     }
