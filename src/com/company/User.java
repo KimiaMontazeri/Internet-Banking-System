@@ -52,7 +52,6 @@ public class User
             return false;
         }
         accountList.add(account);
-        System.out.println("New account opened.");
         return true;
     }
 
