@@ -112,33 +112,27 @@ public class User
 
     public boolean transfer (Account srcAccount, Account destAccount, int amount)
     {
-        if (!searchAccounts(srcAccount))
-        {
-            System.out.println("The source account does not exist in the list.");
+        if (!searchAccounts(srcAccount) || destAccount == null)
             return false;
-        }
 
         if (amount < 0)
             amount *= -1;
 
-        if (searchAccounts(destAccount))
+        if (srcAccount.updateBalance((-1) * amount))
         {
-            if (srcAccount.updateBalance((-1) * amount))
-            {
-                destAccount.updateBalance(amount);
+            destAccount.updateBalance(amount);
 
-                Transaction transaction1 = new Transaction((-1) * amount);
-                Transaction transaction2 = new Transaction(amount);
+            // creates a new object of transaction class
+            Transaction transaction1 = new Transaction((-1) * amount);
+            Transaction transaction2 = new Transaction(amount);
 
-                srcAccount.addTransaction(transaction1);
-                destAccount.addTransaction(transaction2);
+            srcAccount.addTransaction(transaction1);
+            destAccount.addTransaction(transaction2);
 
-                System.out.println("Completed.");
-                return true;
-            }
+            System.out.println("Completed.");
+            return true;
         }
-        System.out.println("Destination account doesn't exist or there is not enough money " +
-                "in your account.");
+        // returns false if there's not enough money in the source account
         return false;
     }
 

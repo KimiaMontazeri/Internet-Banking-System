@@ -4,38 +4,16 @@ import java.util.UUID;
 
 public class Main
 {
-    private BankingSystem bank;
-    private User currentUser;
-    private Account currentAccount;
-    private boolean sysadmin;
+    private static BankingSystem bank;
+    private static User currentUser;
+    private static Account currentAccount;
 
-    public void mainMenu()
-    {
-        String userChoice;
-        Scanner scanner = new Scanner(System.in);
-        do {
-            System.out.println("1.Sign up");
-            System.out.println("2.Log in");
-            System.out.println("3.System admin");
-            System.out.println("4.Exit");
-            userChoice = scanner.nextLine();
-
-            switch (userChoice) {
-                case "1" -> signUp();
-                case "2" -> logIn();
-                case "3" -> sysadminLogIn();
-                case "4" -> System.out.println("Bye :))");
-                default -> System.out.println("Invalid input.");
-            }
-        }while(!userChoice.equals("4"));
-    }
-
-    public void signUp()
+    public static void signUp()
     {
         Scanner scanner = new Scanner(System.in);
         System.out.println("1.Continue\n2.Back");
         if (scanner.nextLine().equals("2"))
-            mainMenu();
+            return;
 
         System.out.println("Enter info: (firstname, lastname, ID, password)");
 
@@ -46,23 +24,19 @@ public class Main
 
         User newUser = new User(firstname, lastname, ID, password);
         if (bank.register(newUser))
-            mainMenu();
-        else
-        {
-            System.out.println("1.Try again\n2.Back");
-            if (scanner.nextLine().equals("1"))
-                signUp();
-            else
-                mainMenu();
-        }
+            return;
+
+        System.out.println("1.Try again\n2.Back");
+        if (scanner.nextLine().equals("1"))
+            signUp();
     }
 
-    public void logIn()
+    public static void logIn()
     {
         Scanner scanner = new Scanner(System.in);
         System.out.println("1.Continue\n2.Back");
         if (scanner.nextLine().equals("2"))
-            mainMenu();
+            return;
 
         System.out.println("Enter ID and password:");
         String ID = scanner.nextLine();
@@ -74,13 +48,12 @@ public class Main
             System.out.println("1.Try again\n2.Back");
             if (scanner.nextLine().equals("1"))
                 logIn();
-            else
-                mainMenu();
+            return;
         }
         loggedInUserMenu();
     }
 
-    public void loggedInUserMenu()
+    public static void loggedInUserMenu()
     {
         // check if we're logged in
         if (currentUser == null)
@@ -110,7 +83,7 @@ public class Main
         }
     }
 
-    public void existingAccounts()
+    public static void existingAccounts()
     {
         Scanner scanner = new Scanner(System.in);
         currentUser.printAllAvailableAccounts();
@@ -130,20 +103,8 @@ public class Main
         loggedInAccountMenu();
     }
 
-    public void loggedInAccountMenu()
+    public static void loggedInAccountMenu()
     {
-        // check if we're logged in
-        if (currentUser == null)
-        {
-            System.out.println("You haven't logged into a user yet.");
-            logIn();
-        }
-        if (currentAccount == null)
-        {
-            System.out.println("You haven't logged into an account yet.");
-            existingAccounts();
-        }
-
         Scanner scanner = new Scanner(System.in);
         System.out.println("1.Withdrawal\n2.Deposit\n3.Transfer\n4.Check balance\n5.Print transactions\n6.Back");
         String choice = scanner.nextLine();
@@ -154,65 +115,83 @@ public class Main
             case "3" -> transfer();
             case "4" -> {
                 currentUser.checkBalance(currentAccount);
-                loggedInAccountMenu();
+                loggedInAccountMenu(); // ?!
             }
             case "5" -> {
                 currentAccount.printAccountData();
                 System.out.println();
                 currentAccount.printTransactions();
                 System.out.println();
-                loggedInAccountMenu();
+                loggedInAccountMenu(); // ?!
             }
             case "6" -> {
                 currentAccount = null;
-                existingAccounts();
+//                existingAccounts();
             }
         }
     }
 
-    public int getAmount()
+    public static int getAmount()
     {
         Scanner scanner = new Scanner(System.in);
         System.out.println("How much money?");
         return Integer.parseInt(scanner.nextLine());
     }
 
-    public void withdrawal(int amount)
+    public static void withdrawal(int amount)
     {
         currentUser.withdrawal(currentAccount, amount);
-        // go back
-        loggedInAccountMenu();
     }
 
-    public void deposit(int amount)
+    public static void deposit(int amount)
     {
         currentUser.deposit(currentAccount, amount);
-        // go back
-        loggedInAccountMenu();
     }
 
-    public void transfer()
+    public static void transfer()
     {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter destination account serial number & the amount of money to transfer(serial amount)");
+        System.out.println("Enter destination account serial number and " +
+                "the amount of money to transfer(serial amount)");
 
         String[] result = scanner.nextLine().split("\\s");
-        // CHECK IF RESULT[0] IS VALID FOR UUID, (ILLEGAL ARGUMENT EXCEPTION)
+        // check if result[0] is valid to be converted into uuid in order to avoid ILLEGAL ARGUMENT EXCEPTION
+        while (!validUuid(result[0]))
+        {
+            System.out.println("Invalid input for serial number.");
+            System.out.println("1.Try again\n2.Back");
+            if (scanner.nextLine().equals("1"))
+                transfer();
+            else
+                return;
+        }
         UUID serial = UUID.fromString(result[0]);
         int amount = Integer.parseInt(result[1]);
 
         Account destAccount = bank.findAccount(serial);
-        currentUser.transfer(currentAccount, destAccount, amount);
-        // go back
-        loggedInAccountMenu();
+        while(!currentUser.transfer(currentAccount, destAccount, amount))
+        {
+            System.out.println("Destination account doesn't exist or there is not enough money in your account.");
+            System.out.println("1.Try again\n2.Back");
+            if (scanner.nextLine().equals("1"))
+                transfer();
+            else
+                return;
+        }
     }
 
-    public void sysadminLogIn()
+    public static boolean validUuid(String str)
+    {
+        String[] result = str.split("-");
+        return result.length == 5;
+    }
+
+    public static void sysadminLogIn()
     {
         Scanner scanner = new Scanner(System.in);
         System.out.println("1.Log in as sysadmin\n2.Back");
         if (scanner.nextLine().equals("2"))
-            mainMenu();
+            return;
 
         System.out.println("Enter userID and password");
         String username = scanner.nextLine();
@@ -220,7 +199,6 @@ public class Main
         if (username.equals("sysadmin") && password.equals("1234"))
         {
             System.out.println("Logged in as sysadmin.");
-            sysadmin = true;
             sysadminMenu();
         }
         else
@@ -230,7 +208,7 @@ public class Main
         }
     }
 
-    public void sysadminMenu()
+    public static void sysadminMenu()
     {
         Scanner scanner = new Scanner(System.in);
         System.out.println("1.Display users\n2.Display accounts\n3.Remove user\n4.Remove account\n5.Back");
@@ -245,19 +223,13 @@ public class Main
             }
             case "3" -> removeUser();
             case "4" -> removeAccount();
-            case "5" -> sysadminLogIn();
+//            case "5" -> sysadminLogIn();
             default -> sysadminMenu();
         }
     }
 
-    public void removeUser()
+    public static void removeUser()
     {
-        if (!sysadmin)
-        {
-            System.out.println("System admin has not logged in yet.");
-            sysadminLogIn();
-        }
-
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the user's ID:");
         String ID = scanner.nextLine();
@@ -268,13 +240,10 @@ public class Main
             System.out.println("1.Try again\n2.Back");
             if (scanner.nextLine().equals("1"))
                 removeUser();
-            else
-                sysadminMenu();
         }
-        sysadminMenu();
     }
 
-    public void removeAccount()
+    public static void removeAccount()
     {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the account's serial number:");
@@ -287,22 +256,33 @@ public class Main
             System.out.println("1.Try again\n2.Back");
             if (scanner.nextLine().equals("1"))
                 removeAccount();
-            else
-                sysadminMenu();
         }
-        sysadminMenu();
     }
 
-    public Main()
+
+    public static void main(String[] args)
     {
         bank = new BankingSystem();
         currentUser = null;
         currentAccount = null;
-        mainMenu();
-    }
 
-    public static void main(String[] args)
-    {
-        new Main();
+        // main menu
+        String userChoice;
+        Scanner scanner = new Scanner(System.in);
+        do {
+            System.out.println("1.Sign up");
+            System.out.println("2.Log in");
+            System.out.println("3.System admin");
+            System.out.println("4.Exit");
+            userChoice = scanner.nextLine();
+
+            switch (userChoice) {
+                case "1" -> signUp();
+                case "2" -> logIn();
+                case "3" -> sysadminLogIn();
+                case "4" -> System.out.println("Bye :))");
+                default -> System.out.println("Invalid input.");
+            }
+        }while(!userChoice.equals("4"));
     }
 }
