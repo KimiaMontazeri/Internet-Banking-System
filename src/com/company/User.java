@@ -1,6 +1,5 @@
 package com.company;
 import java.util.ArrayList;
-import java.util.UUID;
 
 public class User
 {
@@ -36,6 +35,19 @@ public class User
         return password;
     }
 
+    public void setFirstName(String firstName)
+    {
+        this.firstName = firstName;
+    }
+    public void setLastname(String lastname)
+    {
+        this.lastname = lastname;
+    }
+    public void setPassword(String password)
+    {
+        this.password = password;
+    }
+
     public Account getAccountByIndex(int index)
     {
         if (index < 0 || index >= accountList.size())
@@ -43,37 +55,32 @@ public class User
         return accountList.get(index);
     }
 
-    public boolean addAccount (Account account)
+    public void addAccount (Account account)
     {
         // check if the account already exists
         if (searchAccounts(account))
         {
             System.out.println("This account already exists.");
-            return false;
+            return;
         }
         accountList.add(account);
-        return true;
     }
 
-    public boolean removeAccount (Account account)
+    public void removeAccount (Account account)
     {
         // add a search method to check if the given account exists (check if the list is empty)
         // if the given account exists, run the following code
-        accountList.remove(account);
+//        accountList.remove(account);
         if (searchAccounts(account))
-        {
             accountList.remove(account);
-            return true;
-        }
-        return false;
     }
 
-    public boolean deposit (Account account, int amount)
+    public void deposit (Account account, int amount)
     {
         if (!searchAccounts(account))
         {
             System.out.println("This account does not exist in the list.");
-            return false;
+            return;
         }
 
         if (amount < 0)
@@ -83,15 +90,14 @@ public class User
         account.updateBalance(amount);
         account.addTransaction(transaction);
         System.out.println("Completed.");
-        return true;
     }
 
-    public boolean withdrawal (Account account, int amount)
+    public void withdrawal (Account account, int amount)
     {
         if (!searchAccounts(account))
         {
             System.out.println("This account does not exist in the list.");
-            return false;
+            return;
         }
 
         if (amount > 0)
@@ -103,10 +109,9 @@ public class User
             Transaction transaction = new Transaction(amount);
             account.addTransaction(transaction);
             System.out.println("Completed.");
-            return true;
+            return;
         }
         System.out.println("Not enough money.");
-        return false;
     }
 
     public boolean transfer (Account srcAccount, Account destAccount, int amount)
@@ -160,25 +165,12 @@ public class User
 
     private boolean searchAccounts(Account account)
     {
-//        for (Account a : accountList)
-//        {
-//            if (a.equals(account))
-//                return true;
-//        }
-        return accountList.contains(account);
+        for (Account a : accountList)
+        {
+            if (a.equals(account))
+                return true;
+        }
+        return false;
+//        return accountList.contains(account);
     }
-
-    // the user types : " destAccountSerial amount " for transferring money
-    // the program uses this method to check if the destination account exists
-//    private boolean searchAccountsBySerial (UUID serial) //it may be static idk
-//    {
-//        for (Account a : accountList)
-//        {
-//            if (a.getSerial().equals(serial))
-//                return true;
-//        }
-//        return false;
-//    }
-
-
 }
