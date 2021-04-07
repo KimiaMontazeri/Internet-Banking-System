@@ -52,15 +52,22 @@ public class Account
         return transactionList;
     }
 
-//    public boolean updateBalance (int amount)
-//    {
-//        // note that amount can be a negative integer
-//        if (balance + amount < 0)
-//            return false;
-//
-//        balance += amount;
-//        return true;
-//    }
+    public void setFirstName(String firstName)
+    {
+        this.firstName = firstName;
+    }
+    public void setLastName(String lastName)
+    {
+        this.lastName = lastName;
+    }
+    public void setType(String type)
+    {
+        this.type = type;
+    }
+    public void setTransactionList(ArrayList<Transaction> list)
+    {
+        transactionList = list;
+    }
 
     public boolean updateBalance(int amount)
     {
@@ -79,11 +86,9 @@ public class Account
 
     public void addTransaction (Transaction transaction)
     {
+        // balance is updated before this method is called
         if (hasEnoughMoney(transaction.getAmount()))
-        {
             transactionList.add(transaction);
-            //updateBalance(transaction.getAmount());
-        }
     }
 
     public void printTransactions()

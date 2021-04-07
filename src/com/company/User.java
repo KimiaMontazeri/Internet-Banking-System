@@ -50,7 +50,7 @@ public class User
 
     public Account getAccountByIndex(int index)
     {
-        if (index < 0 || index >= accountList.size())
+        if (index < 0 || index >= accountList.size()) // check if the index is not out of boundary
             return null;
         return accountList.get(index);
     }
@@ -68,61 +68,56 @@ public class User
 
     public void removeAccount (Account account)
     {
-        // add a search method to check if the given account exists (check if the list is empty)
-        // if the given account exists, run the following code
-//        accountList.remove(account);
-        if (searchAccounts(account))
+        if (searchAccounts(account)) // check if the account exists
             accountList.remove(account);
     }
 
     public void deposit (Account account, int amount)
     {
-        if (!searchAccounts(account))
+        if (searchAccounts(account)) // check if the account exists
         {
-            System.out.println("This account does not exist in the list.");
-            return;
-        }
+            if (amount < 0)
+                amount *= -1;
 
-        if (amount < 0)
-            amount *= -1;
-
-        Transaction transaction = new Transaction(amount);
-        account.updateBalance(amount);
-        account.addTransaction(transaction);
-        System.out.println("Completed.");
-    }
-
-    public void withdrawal (Account account, int amount)
-    {
-        if (!searchAccounts(account))
-        {
-            System.out.println("This account does not exist in the list.");
-            return;
-        }
-
-        if (amount > 0)
-            amount *= -1;
-
-        // check if there's enough money
-        if (account.updateBalance(amount))
-        {
             Transaction transaction = new Transaction(amount);
+            account.updateBalance(amount);
             account.addTransaction(transaction);
             System.out.println("Completed.");
             return;
         }
-        System.out.println("Not enough money.");
+        System.out.println("This account does not exist in the list.");
+    }
+
+    public void withdrawal (Account account, int amount)
+    {
+        if (searchAccounts(account)) // check if the account exists
+        {
+            if (amount > 0)
+                amount *= -1;
+
+            // check if there's enough money
+            if (account.updateBalance(amount))
+            {
+                Transaction transaction = new Transaction(amount);
+                account.addTransaction(transaction);
+                System.out.println("Completed.");
+                return;
+            }
+            System.out.println("Not enough money.");
+            return;
+        }
+        System.out.println("This account does not exist in the list.");
     }
 
     public boolean transfer (Account srcAccount, Account destAccount, int amount)
     {
-        if (!searchAccounts(srcAccount) || destAccount == null)
+        if (!searchAccounts(srcAccount) || destAccount == null) // the accounts don't exist
             return false;
 
         if (amount < 0)
             amount *= -1;
 
-        if (srcAccount.updateBalance((-1) * amount))
+        if (srcAccount.updateBalance((-1) * amount)) // check if the source account has enough money
         {
             destAccount.updateBalance(amount);
 

@@ -49,8 +49,10 @@ public class BankingSystem
 
     public User login(String id, String pass)
     {
-        for (User u : users)
+        Iterator<User> itr = users.iterator();
+        while (itr.hasNext())
         {
+            User u = itr.next();
             if (u.getID().equals(id))
             {
                 if (u.getPassword().equals(pass))
@@ -62,54 +64,69 @@ public class BankingSystem
                 return null;
             }
         }
+        // we have iterated the whole list and none of the if statements were true
         System.out.println("User not found.");
-        //System.out.println("user doesn't exists or password is incorrect.");
         return null;
     }
 
-    public boolean removeUser(User user)
+    public void removeUser(User user)
     {
         if (user == null)
         {
             System.out.println("User doesn't exist.");
-            return false;
+            return;
         }
-        if (searchUsers(user))
+        Iterator<User> itr = users.iterator();
+        while (itr.hasNext())
         {
-            users.remove(user);
-            System.out.println("User removed.");
-            return true;
+            User temp = itr.next();
+            if (temp.equals(user))
+            {
+                users.remove(temp);
+                System.out.println("User removed.");
+                return;
+            }
         }
+//        if (searchUsers(user))
+//        {
+//            users.remove(user);
+//            System.out.println("User removed.");
+//            return;
+//        }
         System.out.println("User doesn't exist.");
-        return false;
     }
 
-    public boolean removeAccount(Account account)
+    public void removeAccount(Account account)
     {
         if (account == null)
         {
             System.out.println("Account doesn't exist.");
-            return false;
+            return;
         }
-        if (searchAccounts(account))
+        Iterator<Account> itr = accounts.iterator();
+        while (itr.hasNext())
         {
-            // remove from the bank's list of accounts
-            accounts.remove(account);
-            // remove the account from the user's list of accounts
-            User user = findUser(account.getID());
-            user.removeAccount(account);
-            System.out.println("Account removed.");
-            return true;
+            Account temp = itr.next();
+            if (temp.equals(account))
+            {
+                accounts.remove(temp);
+                // remove this account from its owner's list of accounts too
+                User user = findUser(account.getID());
+                user.removeAccount(account);
+                System.out.println("Account removed.");
+                return;
+            }
         }
         System.out.println("Account doesn't exist.");
-        return false;
     }
 
     public void displayUsers()
     {
         int i = 1;
-        for (User u : users)
+        Iterator<User> itr = users.iterator();
+        while (itr.hasNext())
         {
+            User u = itr.next();
             System.out.print("User " + i + ": ");
             System.out.println(u.getFirstName() + " " + u.getLastname() + " " + u.getID());
             i++;
@@ -119,10 +136,11 @@ public class BankingSystem
     public void displayAccounts()
     {
         int i = 1;
-        for (Account a : accounts)
+        Iterator<Account> itr = accounts.iterator();
+        while (itr.hasNext())
         {
             System.out.print("Account " + i + ": ");
-            a.printAccountData();
+            itr.next().printAccountData();
             i++;
         }
     }
@@ -155,22 +173,11 @@ public class BankingSystem
 
     private boolean searchUsers(User user)
     {
-//        for (User u : users)
-//        {
-//            // compare the user with all the existing users by their ID
-//            if (u.getID().equals(user.getID()))
-//                return true;
-//        }
         return users.contains(user);
     }
 
     private boolean searchAccounts(Account account)
     {
-//        for (Account a : accounts)
-//        {
-//            if (a.equals(account))
-//                return true;
-//        }
         return accounts.contains(account);
     }
 }

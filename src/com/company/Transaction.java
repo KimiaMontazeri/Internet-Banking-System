@@ -3,7 +3,7 @@ import java.util.Date;
 
 public class Transaction
 {
-    private int amount;
+    private final int amount;
     private final Date date;
 
     public Transaction (int amount)
